@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>مين راعي السالفة؟ 🕵️‍♂️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;800&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root { --main: #e67e22; --blue: #3498db; --dark: #2c3e50; --white: #ffffff; }
+        body { background: var(--dark); font-family: 'Tajawal', sans-serif; margin: 0; color: white; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        
+        .container { width: 90%; max-width: 500px; padding: 20px; text-align: center; }
+        .box { background: var(--white); color: #333; padding: 20px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); margin: 20px 0; }
+        
+        h1 { font-weight: 800; color: var(--main); }
+        .status-pill { background: rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 50px; font-size: 13px; margin-bottom: 20px; display: inline-block; }
+        
+        .timer { font-size: 30px; font-weight: 800; color: #e74c3c; margin: 10px 0; }
+        
+        input, textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 12px; border: 1px solid #ddd; font-family: inherit; font-size: 16px; box-sizing: border-box; }
+        textarea { height: 100px; resize: none; }
+
+        .btn { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: 800; cursor: pointer; font-family: inherit; font-size: 16px; transition: 0.2s; }
+        .btn-main { background: var(--main); color: white; }
+        .btn-vote { background: var(--blue); color: white; margin: 5px 0; }
+        
+        .player-card { background: #f8f9fa; padding: 10px; border-radius: 10px; margin: 5px 0; border: 2px solid transparent; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .player-card.selected { border-color: var(--blue); background: #ebf5fb; }
+        
+        #login-screen { position: fixed; inset: 0; background: var(--dark); z-index: 2000; display: flex; align-items: center; justify-content: center; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <div class="box" style="max-width:350px;">
+            <h1>دخول اللعبة</h1>
+            <input type="number" id="roomInput" placeholder="رقم الغرفة">
+            <input type="text" id="userInput" placeholder="اسمك">
+            <button class="btn btn-main" onclick="joinGame()">انضمام</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>مين راعي السالفة؟</h1>
+        <div class="status-pill" id="roomDisplay">..</div>
+
+        <div id="stage-write" class="box">
+            <h3>اكتب سالفة واقعية صارت لك:</h3>
+            <textarea id="storyInput" placeholder="مثلاً: مرة ضعت في السوق وأنا صغير.."></textarea>
+            <button class="btn btn-main" id="submitStoryBtn" onclick="submitStory()">إرسال السالفة ✅</button>
+            <p id="waitMsg" class="hidden" style="color:var(--main)">تم استلام سالفتك، انتظر البقية..</p>
+        </div>
+
+        <div id="stage-play" class="box hidden">
+            <div class="timer" id="timer">05:00</div>
+            <div style="background:#fff3e0; padding:15px; border-radius:15px; border-right:5px solid var(--main);">
+                <h4 style="margin:0 0 10px 0; color:var(--main)">السالفة المختارة:</h4>
+                <p id="displayStory" style="font-size:18px; line-height:1.6; font-weight:500;">..</p>
+            </div>
+            <p style="font-size:13px; color:#666; margin-top:15px;">حققوا مع بعض.. مين تتوقعون صاحبها؟</p>
+            <button class="btn btn-vote" onclick="goToVoting()">انتقل للتصويت الآن 🗳️</button>
+        </div>
+
+        <div id="stage-vote" class="box hidden">
+            <h3>من هو راعي السالفة؟</h3>
+            <div id="voteList"></div>
+            <button id="finalVoteBtn" class="btn btn-main" style="margin-top:10px" onclick="confirmVote()">تأكيد التصويت</button>
+        </div>
+
+        <div id="stage-result" class="box hidden">
+            <h2 id="resultMsg">..</h2>
+            <div id="stats"></div>
+            <button class="btn btn-main" onclick="resetGame()">لعبة جديدة 🔄</button>
+        </div>
+
+        <div id="host-tools" class="hidden">
+            <button class="btn" style="background:rgba(255,255,255,0.1); color:white; margin-top:20px;" onclick="startGame()">بدء اللعبة (للأدمن) 🚀</button>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = { 
+            apiKey: "AIzaSyBZfqpgix19pOGd_6xFMTV-p2YbrJmLwGo", 
+            authDomain: "mutakhafi-habba.firebaseapp.com", 
+            projectId: "mutakhafi-habba", 
+            databaseURL: "https://mutakhafi-habba-default-rtdb.europe-west1.firebasedatabase.app" 
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let rId, uName, myVote = "", isHost = false;
+
+        function joinGame() {
+            rId = document.getElementById('roomInput').value;
+            uName = document.getElementById('userInput').value;
+            if(!rId || !uName) return alert("عبّ البيانات!");
+
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('roomDisplay').innerText = "غرفة: " + rId + " | اللاعب: " + uName;
+
+            db.ref(`salfah_real/${rId}/players/${uName}`).set({ name: uName, voted: false });
+            checkHost();
+            listen();
+        }
+
+        function checkHost() {
+            db.ref(`salfah_real/${rId}/host`).once('value', snap => {
+                if(!snap.val() || snap.val() === uName) {
+                    db.ref(`salfah_real/${rId}/host`).set(uName);
+                    isHost = true;
+                    document.getElementById('host-tools').classList.remove('hidden');
+                }
+            });
+        }
+
+        function submitStory() {
+            const story = document.getElementById('storyInput').value;
+            if(story.length < 5) return alert("اكتب سالفة كاملة!");
+            db.ref(`salfah_real/${rId}/stories/${uName}`).set(story);
+            document.getElementById('submitStoryBtn').classList.add('hidden');
+            document.getElementById('storyInput').disabled = true;
+            document.getElementById('waitMsg').classList.remove('hidden');
+        }
+
+        function startGame() {
+            db.ref(`salfah_real/${rId}/stories`).once('value', snap => {
+                const stories = snap.val();
+                if(!stories || Object.keys(stories).length < 2) return alert("نحتاج سالفتين على الأقل!");
+                
+                const players = Object.keys(stories);
+                const randomOwner = players[Math.floor(Math.random() * players.length)];
+                
+                db.ref(`salfah_real/${rId}/game`).set({
+                    state: 'playing',
+                    story: stories[randomOwner],
+                    owner: randomOwner,
+                    timer: 300
+                });
+            });
+        }
+
+        function listen() {
+            db.ref(`salfah_real/${rId}/game`).on('value', snap => {
+                const data = snap.val(); if(!data) return;
+
+                if(data.state === 'playing') {
+                    showStage('stage-play');
+                    document.getElementById('displayStory').innerText = data.story;
+                    updateTimer(data.timer);
+                } else if(data.state === 'voting') {
+                    showStage('stage-vote');
+                    loadVoteList();
+                } else if(data.state === 'result') {
+                    showResult(data);
+                }
+            });
+        }
+
+        function updateTimer(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            document.getElementById('timer').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        function goToVoting() {
+            if(isHost) db.ref(`salfah_real/${rId}/game/state`).set('voting');
+        }
+
+        function loadVoteList() {
+            db.ref(`salfah_real/${rId}/players`).once('value', snap => {
+                const list = document.getElementById('voteList');
+                list.innerHTML = '';
+                Object.keys(snap.val()).forEach(p => {
+                    const div = document.createElement('div');
+                    div.className = 'player-card';
+                    div.innerText = p;
+                    div.onclick = () => {
+                        document.querySelectorAll('.player-card').forEach(c => c.classList.remove('selected'));
+                        div.classList.add('selected');
+                        myVote = p;
+                    };
+                    list.appendChild(div);
+                });
+            });
+        }
+
+        function confirmVote() {
+            if(!myVote) return alert("اختر شخص!");
+            db.ref(`salfah_real/${rId}/votes/${uName}`).set(myVote);
+            document.getElementById('finalVoteBtn').innerText = "تم التصويت ✅";
+            document.getElementById('finalVoteBtn').disabled = true;
+            if(isHost) checkVotes();
+        }
+
+        function checkVotes() {
+            // كود بسيط لإنهاء اللعبة إذا الكل صوّت (يمكن تطويره)
+            setTimeout(() => {
+                if(isHost) db.ref(`salfah_real/${rId}/game/state`).set('result');
+            }, 5000);
+        }
+
+        function showResult(data) {
+            showStage('stage-result');
+            document.getElementById('resultMsg').innerText = "راعي السالفة الحقيقي هو: " + data.owner;
+        }
+
+        function showStage(id) {
+            ['stage-write', 'stage-play', 'stage-vote', 'stage-result'].forEach(s => {
+                document.getElementById(s).classList.add('hidden');
+            });
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function resetGame() {
+            if(isHost) db.ref(`salfah_real/${rId}`).remove();
+            location.reload();
+        }
+    </script>
+</body>
+</html>
