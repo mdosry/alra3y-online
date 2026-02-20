@@ -11,6 +11,14 @@
     <style>
         :root { --main: #e67e22; --dark: #1a1a1a; --gold: #d4af37; --white: #ffffff; }
         body { background: var(--dark); font-family: 'Tajawal', sans-serif; color: white; text-align: center; margin: 0; padding: 0; }
+        
+        /* لوحة رقم الغرفة الجديدة */
+        #room-banner { 
+            background: linear-gradient(to bottom, var(--gold), #b8860b);
+            color: black; padding: 10px; font-weight: 800; font-size: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5); border-bottom: 2px solid #000;
+        }
+
         .box { background: var(--white); color: #333; padding: 20px; border-radius: 20px; margin: 15px; border: 3px solid var(--gold); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
         h1 { color: var(--gold); font-size: 26px; }
         .btn { background: var(--main); color: white; padding: 15px; border: none; border-radius: 12px; width: 90%; cursor: pointer; font-weight: 800; font-size: 18px; margin-top: 10px; }
@@ -32,6 +40,8 @@
     </div>
 
     <div id="game-screen" class="hidden">
+        <div id="room-banner">مجلس رقم: <span id="roomDisplay">--</span></div>
+        
         <div class="box">
             <h3 style="margin:0">لوحة الشرف (النقاط):</h3>
             <div id="playerList">بانتظار النشامى..</div>
@@ -55,7 +65,7 @@
         </div>
 
         <div id="result-stage" class="box hidden">
-            <h1 id="resultHeader">انكشفت السالفة!</h1>
+            <h1 id="resultHeader">انكشفت الحقيقة!</h1>
             <h2 id="ownerName" style="font-size:30px; color:#27ae60"></h2>
             <div id="scoreChange" style="font-weight:bold; margin-bottom:15px;"></div>
             <button class="btn" onclick="nextRound()">جولة جديدة 🔄</button>
@@ -87,6 +97,9 @@
             if(!rId || !uName) return alert("البيانات لاهنت!");
 
             sfx.join.play();
+            // تحديث رقم الغرفة في الشاشة
+            document.getElementById('roomDisplay').innerText = rId;
+            
             const path = `Salfah_Scores_V1/${rId}`;
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
