@@ -3,99 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>مين راعي السالفة؟ 🕵️‍♂️</title>
+    <title>مين راعي السالفة؟ - النسخة المترابطة</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;800&display=swap" rel="stylesheet">
+    
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 
     <style>
-        :root { --main: #e67e22; --blue: #3498db; --dark: #2c3e50; --white: #ffffff; --green: #27ae60; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--dark); font-family: 'Tajawal', sans-serif; margin: 0; color: white; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
-        
-        .container { width: 95%; max-width: 500px; padding: 20px; text-align: center; }
-        .box { background: var(--white); color: #333; padding: 25px; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); margin: 20px 0; animation: slideUp 0.4s ease-out; }
-        
-        h1 { font-weight: 800; color: var(--main); margin-bottom: 5px; }
-        .status-header { background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 15px; font-size: 14px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; width: 100%; }
-        
-        input, textarea { width: 100%; padding: 15px; margin: 10px 0; border-radius: 15px; border: 2px solid #f0f0f0; font-family: inherit; font-size: 16px; background: #fafafa; }
-        textarea { height: 120px; resize: none; }
-        input:focus, textarea:focus { border-color: var(--main); outline: none; background: #fff; }
-
-        .btn { width: 100%; padding: 16px; border-radius: 15px; border: none; font-weight: 800; cursor: pointer; font-family: inherit; font-size: 16px; transition: 0.3s; position: relative; }
-        .btn-main { background: var(--main); color: white; box-shadow: 0 5px 0 #d35400; margin-bottom: 10px; }
-        .btn-main:active { transform: translateY(3px); box-shadow: 0 2px 0 #d35400; }
-        .btn-green { background: var(--green); color: white; box-shadow: 0 5px 0 #1e8449; }
-        .btn-vote { background: var(--blue); color: white; box-shadow: 0 5px 0 #2980b9; }
-
-        .player-card { background: #f9f9f9; padding: 15px; border-radius: 15px; margin: 10px 0; border: 2px solid #eee; font-weight: 800; transition: 0.2s; }
-        .player-card.selected { border-color: var(--blue); background: #ebf5fb; color: var(--blue); transform: scale(1.02); }
-
-        #login-screen { position: fixed; inset: 0; background: var(--dark); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        :root { --main: #e67e22; --blue: #3498db; --dark: #2c3e50; --white: #ffffff; }
+        body { background: var(--dark); font-family: 'Tajawal', sans-serif; margin: 0; color: white; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .container { width: 95%; max-width: 450px; padding: 20px; text-align: center; }
+        .box { background: var(--white); color: #333; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); margin: 20px 0; }
+        input, textarea { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: 2px solid #eee; font-family: inherit; font-size: 16px; box-sizing: border-box; }
+        .btn { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: 800; cursor: pointer; font-size: 16px; transition: 0.3s; }
+        .btn-main { background: var(--main); color: white; box-shadow: 0 4px 0 #d35400; }
         .hidden { display: none !important; }
-        
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .player-tag { background: #eee; padding: 5px 12px; border-radius: 20px; display: inline-block; margin: 5px; font-size: 12px; color: #555; }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
-        <div class="box" style="width: 100%; max-width: 380px;">
-            <h1>مين راعي السالفة؟ 📝</h1>
-            <p style="color:#777; margin-bottom: 20px;">ادخل الغرفة وشاركنا سوالفك!</p>
-            <input type="number" id="roomInput" placeholder="رقم الغرفة (مثال: 55)">
-            <input type="text" id="userInput" placeholder="اسمك المستعار">
-            <button class="btn btn-main" onclick="joinGame()">دخول المجلس ☕</button>
+        <div class="box" style="margin-top: 50px;">
+            <h1>مين راعي السالفة؟🕵️‍♂️</h1>
+            <input type="number" id="roomInput" placeholder="رقم الغرفة (مثلاً 777)">
+            <input type="text" id="userInput" placeholder="اسمك">
+            <button class="btn btn-main" onclick="joinGame()">دخول أونلاين 🚀</button>
         </div>
     </div>
 
-    <div class="container">
-        <div class="status-header">
-            <span id="displayRoom">غرفة: --</span>
-            <span id="displayName">أنت: --</span>
-        </div>
+    <div class="container hidden" id="game-screen">
+        <div id="roomTag" style="background:rgba(255,255,255,0.1); padding:5px; border-radius:10px; margin-bottom:10px;"></div>
         
-        <div id="stage-write" class="box">
-            <h2 style="margin-top:0">وش سالفتك اليوم؟ ✍️</h2>
-            <p style="color:#666; font-size:14px;">اكتب سالفة حقيقية صارت لك بوضوح عشان نتحقق منها</p>
-            <textarea id="storyInput" placeholder="اكتب هنا.. مثلاً: مرة ضعت في البر وأنا صغير.."></textarea>
-            <button class="btn btn-main" id="submitBtn" onclick="submitStory()">إرسال السالفة ✅</button>
-            <div id="waitMsg" class="hidden" style="margin-top:15px; color:var(--green); font-weight:800;">وصلت سالفتك! خلك جاهز للنكبة..</div>
+        <div id="lobby">
+            <div class="box">
+                <h3>المتواجدون في الغرفة الآن:</h3>
+                <div id="playerList">بانتظار دخول اللاعبين..</div>
+            </div>
             
-            <div id="host-tools" class="hidden" style="margin-top:25px; border-top:2px solid #f0f0f0; padding-top:20px;">
-                <p style="font-size:12px; color:#888;">لوحة تحكم الأدمن</p>
-                <button class="btn btn-green" onclick="startGame()">بدء اللعبة للجميع 🚀</button>
+            <div class="box" id="write-box">
+                <h3>اكتب سالفتك 📝</h3>
+                <textarea id="storyInput" placeholder="اكتب سالفة حقيقية صارت لك.."></textarea>
+                <button class="btn btn-main" id="submitBtn" onclick="submitStory()">إرسال السالفة ✅</button>
+            </div>
+
+            <div id="host-controls" class="hidden">
+                <button class="btn btn-main" style="background:#27ae60; box-shadow:0 4px 0 #1e8449;" onclick="startGame()">ابدأ اللعبة للكل (أنت الأدمن) 🚀</button>
             </div>
         </div>
 
-        <div id="stage-play" class="box hidden">
-            <div style="background:#fff4e5; padding:25px; border-radius:20px; border:2px dashed var(--main); position:relative;">
-                <span style="position:absolute; top:-12px; right:20px; background:var(--main); color:white; padding:2px 10px; border-radius:10px; font-size:12px;">السالفة المختارة</span>
-                <p id="displayStory" style="font-size:20px; line-height:1.6; font-weight:800; color:#2c3e50; margin:0;">..</p>
+        <div id="play-area" class="hidden">
+            <div class="box">
+                <h4 style="color:var(--main)">السالفة المختارة:</h4>
+                <p id="displayStory" style="font-size:20px; font-weight:800;"></p>
             </div>
-            <p style="margin:20px 0; color:#e74c3c; font-weight:800; font-size:18px;">حققوا مع بعض.. من راعيها؟ 🤔</p>
-            <button id="host-vote-trigger" class="btn btn-vote hidden" onclick="triggerVoteStage()">بدء التصويت الآن 🗳️</button>
-        </div>
-
-        <div id="stage-vote" class="box hidden">
-            <h3>من هو المتهم الرئيسي؟ 🧐</h3>
-            <div id="voteList"></div>
-            <button id="finalVoteBtn" class="btn btn-main" style="margin-top:15px" onclick="confirmVote()">تأكيد اختياري</button>
-        </div>
-
-        <div id="stage-result" class="box hidden">
-            <h1 style="color:var(--blue); margin:0;">انكشفت الحقيقة!</h1>
-            <div style="background:#f0f7ff; padding:25px; border-radius:20px; margin:20px 0; border:2px solid var(--blue);">
-                <p style="font-size:16px; color:#555; margin-bottom:10px;">صاحب السالفة هو:</p>
-                <h2 id="ownerName" style="color:var(--main); font-size:36px; margin:0;">..</h2>
-            </div>
-            <button class="btn btn-main" onclick="location.reload()">لعبة جديدة 🔄</button>
+            <button class="btn btn-main" onclick="location.reload()">إنهاء وجولة جديدة 🔄</button>
         </div>
     </div>
 
     <script>
-        // إعدادات Firebase
+        // 1. إعدادات Firebase (تأكد أنها صحيحة 100%)
         const firebaseConfig = { 
             apiKey: "AIzaSyBZfqpgix19pOGd_6xFMTV-p2YbrJmLwGo", 
             authDomain: "mutakhafi-habba.firebaseapp.com", 
@@ -105,123 +72,83 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let rId, uName, isHost = false, selectedTarget = "";
+        let rId, uName;
 
         function joinGame() {
+            // استخدام Trim لمنع مشاكل المسافات
             rId = document.getElementById('roomInput').value.trim();
             uName = document.getElementById('userInput').value.trim();
+
+            if(!rId || !uName) return alert("عبّ الخانات!");
+
+            // تغيير المسار لاسم جديد كلياً لضمان التزامن
+            const roomPath = `GlobalSalfah_v99/${rId}`;
             
-            if(!rId || !uName) return alert("الرجاء إدخال رقم الغرفة واسمك!");
-
-            // عرض معلومات الغرفة
             document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('displayRoom').innerText = "غرفة: " + rId;
-            document.getElementById('displayName').innerText = "أنت: " + uName;
+            document.getElementById('game-screen').classList.remove('hidden');
+            document.getElementById('roomTag').innerText = "غرفة: " + rId + " | أنت: " + uName;
 
-            // 1. الربط الموحد (المسار الذهبي)
-            const playerRef = db.ref(`Salfah_Ultimate/${rId}/players/${uName}`);
-            playerRef.set({ name: uName, online: true });
-            playerRef.onDisconnect().remove();
+            // تسجيل اللاعب في المسار المشترك
+            db.ref(`${roomPath}/players/${uName}`).set({ name: uName, status: "online" });
+            db.ref(`${roomPath}/players/${uName}`).onDisconnect().remove();
 
-            // 2. تحديد الأدمن بشكل آمن (Transaction)
-            db.ref(`Salfah_Ultimate/${rId}/host`).transaction((currentHost) => {
-                return currentHost === null ? uName : currentHost;
-            }, (error, committed, snapshot) => {
-                if (committed && snapshot.val() === uName) {
-                    isHost = true;
-                    document.getElementById('host-tools').classList.remove('hidden');
-                    document.getElementById('host-vote-trigger').classList.remove('hidden');
+            // تعيين أول شخص يدخل كأدمن
+            db.ref(`${roomPath}/host`).transaction((h) => {
+                return h === null ? uName : h;
+            }, (err, comm, snap) => {
+                if(snap.val() === uName) document.getElementById('host-controls').classList.remove('hidden');
+            });
+
+            // الاستماع لكل التغييرات في الغرفة
+            listen(roomPath);
+        }
+
+        function listen(path) {
+            // تحديث قائمة اللاعبين عند الجميع
+            db.ref(`${path}/players`).on('value', snap => {
+                const list = document.getElementById('playerList');
+                list.innerHTML = "";
+                if(snap.exists()){
+                    Object.keys(snap.val()).forEach(p => {
+                        list.innerHTML += `<span class="player-tag">👤 ${p}</span>`;
+                    });
                 }
             });
 
-            listenToGame();
+            // الاستماع لبدء اللعبة
+            db.ref(`${path}/game`).on('value', snap => {
+                const data = snap.val();
+                if(data && data.state === 'active') {
+                    document.getElementById('lobby').classList.add('hidden');
+                    document.getElementById('play-area').classList.remove('hidden');
+                    document.getElementById('displayStory').innerText = data.story;
+                }
+            });
         }
 
         function submitStory() {
             const story = document.getElementById('storyInput').value.trim();
-            if(story.length < 5) return alert("السالفة قصيرة جداً، عطنا تفاصيل!");
-            
-            db.ref(`Salfah_Ultimate/${rId}/stories/${uName}`).set(story);
-            document.getElementById('submitBtn').classList.add('hidden');
-            document.getElementById('storyInput').disabled = true;
-            document.getElementById('waitMsg').classList.remove('hidden');
+            if(story.length < 3) return alert("اكتب سالفة!");
+            db.ref(`GlobalSalfah_v99/${rId}/stories/${uName}`).set(story);
+            document.getElementById('submitBtn').innerText = "تم الإرسال 👍";
+            document.getElementById('submitBtn').disabled = true;
         }
 
         function startGame() {
-            db.ref(`Salfah_Ultimate/${rId}/stories`).once('value', snap => {
+            db.ref(`GlobalSalfah_v99/${rId}/stories`).once('value', snap => {
                 const stories = snap.val();
-                if(!stories || Object.keys(stories).length < 2) return alert("نحتاج لاعبين اثنين على الأقل أرسلوا سوالفهم!");
+                if(!stories) return alert("ما فيه أحد أرسل سوالف!");
                 
                 const players = Object.keys(stories);
-                const randomOwner = players[Math.floor(Math.random() * players.length)];
+                const randomPlayer = players[Math.floor(Math.random() * players.length)];
                 
-                db.ref(`Salfah_Ultimate/${rId}/game`).set({
-                    state: 'playing',
-                    story: stories[randomOwner],
-                    owner: randomOwner
+                // تحديث حالة اللعبة عند الكـل
+                db.ref(`GlobalSalfah_v99/${rId}/game`).set({
+                    state: 'active',
+                    story: stories[randomPlayer],
+                    owner: randomPlayer
                 });
             });
-        }
-
-        function listenToGame() {
-            db.ref(`Salfah_Ultimate/${rId}/game`).on('value', snap => {
-                const data = snap.val(); if(!data) return;
-
-                if(data.state === 'playing') {
-                    showStage('stage-play');
-                    document.getElementById('displayStory').innerText = data.story;
-                } else if(data.state === 'voting') {
-                    showStage('stage-vote');
-                    buildVoteList();
-                } else if(data.state === 'result') {
-                    showStage('stage-result');
-                    document.getElementById('ownerName').innerText = data.owner;
-                }
-            });
-        }
-
-        function triggerVoteStage() {
-            db.ref(`Salfah_Ultimate/${rId}/game/state`).set('voting');
-        }
-
-        function buildVoteList() {
-            db.ref(`Salfah_Ultimate/${rId}/players`).once('value', snap => {
-                const players = snap.val();
-                const list = document.getElementById('voteList');
-                list.innerHTML = '';
-                Object.keys(players).forEach(p => {
-                    const div = document.createElement('div');
-                    div.className = 'player-card';
-                    div.innerText = p;
-                    div.onclick = () => {
-                        document.querySelectorAll('.player-card').forEach(c => c.classList.remove('selected'));
-                        div.classList.add('selected');
-                        selectedTarget = p;
-                    };
-                    list.appendChild(div);
-                });
-            });
-        }
-
-        function confirmVote() {
-            if(!selectedTarget) return alert("اختر الشخص اللي شاك فيه!");
-            db.ref(`Salfah_Ultimate/${rId}/votes/${uName}`).set(selectedTarget);
-            document.getElementById('finalVoteBtn').innerText = "تم تسجيل صوتك ✅";
-            document.getElementById('finalVoteBtn').disabled = true;
-            
-            if(isHost) {
-                // إظهار النتيجة بعد 5 ثواني تلقائياً للأدمن
-                setTimeout(() => {
-                    db.ref(`Salfah_Ultimate/${rId}/game/state`).set('result');
-                }, 5000);
-            }
-        }
-
-        function showStage(id) {
-            ['stage-write', 'stage-play', 'stage-vote', 'stage-result'].forEach(s => {
-                document.getElementById(s).classList.add('hidden');
-            });
-            document.getElementById(id).classList.remove('hidden');
         }
     </script>
 </body>
